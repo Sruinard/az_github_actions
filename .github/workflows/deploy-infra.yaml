@@ -14,9 +14,6 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}      
     - name: 'Deploy infrastructure'
-      uses: azure/CLI@v1
-      with:
-        azcliversion: 2.28.0
-        inlineScript: |
+      run: |
           chmod +x $GITHUB_WORKSPACE/infra/deploy.sh
           $GITHUB_WORKSPACE/infra/deploy.sh

@@ -1,0 +1,41 @@
+name: Build and Deploy API
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AZURE_PYTHON_WEBAPP_NAME_REST: api-app-api-python-sruinard    
+  AZURE_PYTHON_WEBAPP_ROOT: './apps/pythonAPIREST/'
+  AZURE_PYTHON_WEBAPP_PACKAGE_PATH_REST: './apps/pythonAPIREST/dist/'
+jobs:
+  build_restapi:
+    defaults:
+      run:
+        working-directory: ${{ env.AZURE_PYTHON_WEBAPP_ROOT }}
+    name: Build and Deploy PYTHON REST API
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install wheel
+        python setup.py bdist_wheel 
+    - name: Deploy web App using GH Action azure/webapps-deploy
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_PYTHON_WEBAPP_NAME_REST }}
+        package: ${{ env.AZURE_PYTHON_WEBAPP_PACKAGE_PATH_REST }}
+        startup-command: "pip install *.whl && python -m uvicorn users.app:app --host 0.0.0.0"
