@@ -33,6 +33,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install wheel
         python setup.py bdist_wheel 
+    - uses: actions/upload-artifact@v2
+      with:
+        name: tripplanner
+        path: ${{ env.AZURE_PYTHON_WEBAPP_PACKAGE_PATH_REST }}
   
   # DEPLOY TO DEVELOPMENT
   deploy_dev:
@@ -42,23 +46,18 @@ jobs:
     environment:
       name: development
     steps:
+    - uses: actions/checkout@v2
+    
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: tripplanner
     - name: Deploy web App using GH Action azure/webapps-deploy
       uses: azure/webapps-deploy@v2
       with:
-        app-name: ${{ env.AZURE_PYTHON_WEBAPP_NAME_REST }}
-        package: ${{ env.AZURE_PYTHON_WEBAPP_PACKAGE_PATH_REST }}
-        startup-command: "pip install *.whl && python -m uvicorn tripplanner.app:app --host 0.0.0.0"
-  # DEPLOY TO DEVELOPMENT
-  deploy_prod:
-    name: Deploy to PROD Environment
-    needs: [build, deploy_dev] 
-    runs-on: ubuntu-latest
-    environment:
-      name: development
-    steps:
-    - name: Deploy web App using GH Action azure/webapps-deploy
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: ${{ env.AZURE_PYTHON_WEBAPP_NAME_REST }}
+        app-name: dev-api-app-api-python-sruinard
         package: ${{ env.AZURE_PYTHON_WEBAPP_PACKAGE_PATH_REST }}
         startup-command: "pip install *.whl && python -m uvicorn tripplanner.app:app --host 0.0.0.0"
