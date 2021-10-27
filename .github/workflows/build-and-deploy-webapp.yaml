@@ -65,3 +65,31 @@ jobs:
         app-name: dev-api-app-api-python-sruinard
         package: ${{ env.AZURE_PYTHON_WEBAPP_ROOT }}
         startup-command: "pip install *.whl && python -m uvicorn tripplanner.app:app --host 0.0.0.0"
+
+  # DEPLOY TO PROD
+  deploy_prod:
+    name: Deploy to Production Environment
+    needs: [build, deploy_dev] 
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: tripplanner
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+    - name: Deploy web App using GH Action azure/webapps-deploy
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: prod-api-app-api-python-sruinard
+        package: ${{ env.AZURE_PYTHON_WEBAPP_ROOT }}
+        startup-command: "pip install *.whl && python -m uvicorn tripplanner.app:app --host 0.0.0.0"
