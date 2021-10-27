@@ -10,7 +10,7 @@ env:
   AZURE_PYTHON_WEBAPP_ROOT: './apps/pythonAPIREST/'
   AZURE_PYTHON_WEBAPP_PACKAGE_PATH_REST: './apps/pythonAPIREST/dist/'
 jobs:
-  build_restapi:
+  build:
     defaults:
       run:
         working-directory: ${{ env.AZURE_PYTHON_WEBAPP_ROOT }}
@@ -33,9 +33,32 @@ jobs:
         python -m pip install --upgrade pip
         pip install wheel
         python setup.py bdist_wheel 
+  
+  # DEPLOY TO DEVELOPMENT
+  deploy_dev:
+    name: Deploy to Dev Environment
+    needs: [build] 
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+    steps:
     - name: Deploy web App using GH Action azure/webapps-deploy
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_PYTHON_WEBAPP_NAME_REST }}
         package: ${{ env.AZURE_PYTHON_WEBAPP_PACKAGE_PATH_REST }}
-        startup-command: "pip install *.whl && python -m uvicorn users.app:app --host 0.0.0.0"
+        startup-command: "pip install *.whl && python -m uvicorn tripplanner.app:app --host 0.0.0.0"
+  # DEPLOY TO DEVELOPMENT
+  deploy_prod:
+    name: Deploy to PROD Environment
+    needs: [build, deploy_dev] 
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+    steps:
+    - name: Deploy web App using GH Action azure/webapps-deploy
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_PYTHON_WEBAPP_NAME_REST }}
+        package: ${{ env.AZURE_PYTHON_WEBAPP_PACKAGE_PATH_REST }}
+        startup-command: "pip install *.whl && python -m uvicorn tripplanner.app:app --host 0.0.0.0"
