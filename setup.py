@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     # this will be the package name you will see, e.g. the output of 'conda list' in anaconda prompt
-    name='tripplanner',
+    name='webshop',
     # some version number you may wish to add - increment this after every update
     version='1.0',
 
@@ -23,7 +23,8 @@ setup(
         "uvloop==0.16.0",
         "websockets==8.1",
         "httptools==0.1.2",
-        "python-dotenv==0.19.1"
+        "python-dotenv==0.19.1",
+        "azure-cosmos==4.2.0"
     ],
     # this approach automatically finds out all directories (packages) - those must contain a file named __init__.py (can be empty)
     # include/exclude arguments take * as wildcard, . for any sub-package names

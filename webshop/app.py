@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
 from dotenv import load_dotenv
+from pydantic import BaseModel
+import webshop.repo as repo
 
 load_dotenv()
 
@@ -16,10 +18,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+class Order(BaseModel):
+    item_id: int
+    quantity: int
+    price: float
+
+
 @app.get("/")
 async def get():
-    active_environment = os.environ.get("ACTIVE_ENVIRONMENT", "default")
-    return f"Tripplanner running on {active_environment} environment"
+    return "Distributed tracing"
+
+
+@app.post("/orders")
+async def create_order(order: Order):
+    order_repo = repo.CosmosRepo()
+    placed_order = order_repo.add(order)
+    return placed_order
+
 
 if __name__ == "__main__":
     uvicorn.run(app)
